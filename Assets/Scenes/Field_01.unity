@@ -1695,6 +1695,7 @@ MonoBehaviour:
   NameText: {fileID: 144034507}
   MessageText: {fileID: 894312338}
   NextHint: {fileID: 1823641969}
+  YesNoButtonBG: {fileID: 185217126}
 --- !u!1 &1081629046
 GameObject:
   m_ObjectHideFlags: 0
