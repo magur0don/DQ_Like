@@ -10,5 +10,14 @@ public static class QuestFlag
     /// •ó” A‚ğŠJ‚¯‚½‚©
     /// </summary>
     public static bool OpenedChestA = false;
+    
+    /// <summary>
+    /// •ó” B‚ğŠJ‚¯‚½‚©
+    /// </summary>
+    public static bool OpenedChestB = false;
 
+    /// <summary>
+    /// –œ”\Œ®‚ğ‚Á‚Ä‚¢‚é‚©
+    /// </summary>
+    public static bool HasKey = false;
 }

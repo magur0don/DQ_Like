@@ -117,6 +117,34 @@ public class DialogUI : MonoBehaviour
         ShowLine(lineIndex);
     }
 
+    /// <summary>
+    /// 外部からダイアログを見せる
+    /// </summary>
+    public void ShowSimpleMessage(string dialogMessage)
+    {
+        // dialogMessageが無かったら
+        if (dialogMessage == string.Empty)
+        {
+            Debug.LogWarning("dialogMessageがないです");
+            return;
+        }
+
+        // YesNoボタンは表示しません
+        YesNoButtonBG.SetActive(false);
+
+        GameState.IsDialogOpen = true;
+
+        NameText.text = string.Empty;
+
+        string[] itemLines = new string[1];
+        itemLines[0] = $"{dialogMessage}";
+        currentLines = itemLines;
+        lineIndex = 0;
+
+        Panel.SetActive(true);
+        // 現在の行を表示していく
+        ShowLine(lineIndex);
+    }
 
 
 
@@ -243,7 +271,21 @@ public class DialogUI : MonoBehaviour
         isTyping = false;
     }
 
-
+    /// <summary>
+    /// ダイアログUIが開いていたら次の行を表示する
+    /// </summary>
+    /// <returns></returns>
+    public bool TryNextIfOpen()
+    {
+        // ダイアログが開いていなければ何もしない
+        if (!Panel.activeSelf)
+        {
+            return false;
+        }
+        // ここで Next と全く同じ挙動
+        Next();
+        return true;
+    }
 
     public void OnYes()
     {
