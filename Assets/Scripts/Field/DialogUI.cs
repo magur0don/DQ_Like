@@ -89,6 +89,39 @@ public class DialogUI : MonoBehaviour
     }
 
     /// <summary>
+    /// 外部からアイテム取得のダイアログを見せる
+    /// </summary>
+    public void ShowItemDialog(string dialogMessage)
+    {
+        // dialogMessageが無かったら
+        if (dialogMessage == string.Empty)
+        {
+            Debug.LogWarning("dialogMessageがないです");
+            return;
+        }
+
+        // YesNoボタンは表示しません
+        YesNoButtonBG.SetActive(false);
+
+        GameState.IsDialogOpen = true;
+
+        NameText.text = string.Empty;
+
+        string[] itemLines = new string[1];
+        itemLines[0] = $"{dialogMessage}を　手に入れた" ;
+        currentLines = itemLines;
+        lineIndex = 0;
+
+        Panel.SetActive(true);
+        // 現在の行を表示していく
+        ShowLine(lineIndex);
+    }
+
+
+
+
+
+    /// <summary>
     /// UIのCloseボタンから呼びます
     /// </summary>
     public void Close()
