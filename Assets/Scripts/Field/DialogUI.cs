@@ -5,8 +5,8 @@ using System.Collections;
 public class DialogUI : MonoBehaviour
 {
     /// <summary>
-    /// ‚Ç‚±‚©‚ç‚Å‚àDialogUI‚ÉƒAƒNƒZƒX‚Å‚«‚é‚æ‚¤‚É
-    /// static‚ÅéŒ¾‚·‚é
+    /// ã©ã“ã§ã‚‚DialogUIã«ã‚¢ã‚¯ã‚»ã‚¹ã§ãã‚‹ã‚ˆã†ã«
+    /// staticã§å®£è¨€
     /// </summary>
     public static DialogUI Instance;
 
@@ -16,34 +16,34 @@ public class DialogUI : MonoBehaviour
 
     public TextMeshProUGUI MessageText;
 
-    [Header("¥‚È‚Ç‚ÌNextHint (Optional)")]
+    [Header("ç¶šããŒã‚ã‚‹ã¨ãã®NextHint (Optional)")]
     public GameObject NextHint;
 
     /// <summary>
-    /// ‚Í‚¢A‚¢‚¢‚¦ƒ{ƒ^ƒ“‚Ì•Ï”
+    /// ã¯ã„ã€ã„ã„ãˆãƒœã‚¿ãƒ³ã®è¦ª
     /// </summary>
     public GameObject YesNoButtonBG;
 
 
     /// <summary>
-    /// 1•¶š‚ğ‘Ò‚ÂŠÔ
+    /// 1æ–‡å­—è¡¨ç¤ºã™ã‚‹æ™‚é–“
     /// </summary>
     private float charInterval = 0.2f;
 
     /// <summary>
-    /// ƒƒbƒZ[ƒW‚ÌŒ»İ‚Ìs
+    /// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®ç¾åœ¨ã®è¡Œ
     /// </summary>
     private string[] currentLines;
 
     /// <summary>
-    /// ‰½s–Ú‚©
+    /// è¡Œã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
     /// </summary>
     private int lineIndex;
 
     private Coroutine typingCoroutine;
 
     /// <summary>
-    /// •¶š‘—‚è’†‚©
+    /// ã‚¿ã‚¤ãƒ—ä¸­åˆ¤å®š
     /// </summary>
     private bool isTyping = false;
 
@@ -51,7 +51,7 @@ public class DialogUI : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        // ƒQ[ƒ€ŠJn‚Íƒ_ƒCƒAƒƒO‚Í•\¦‚µ‚È‚¢
+        // ã‚²ãƒ¼ãƒ é–‹å§‹æ™‚ã¯ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã¯è¡¨ç¤ºã—ãªã„
         Panel.SetActive(false);
         if (NextHint != null)
         {
@@ -60,20 +60,20 @@ public class DialogUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ŠO•”‚©‚çƒ_ƒCƒAƒƒO‚Ìİ’è‚ğ‚µ‚ÄŒ©‚¹‚é
+    /// é€šå¸¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®è¨­å®šã¨è¡¨ç¤º
     /// </summary>
     public void Show(DialogData dialogData)
     {
-        // DialogData‚Ìƒf[ƒ^‚ª³í‚É“®‚©‚È‚¢ê‡
+        // DialogDataã®ãƒ‡ãƒ¼ã‚¿ã«å…¥åŠ›ãŒãªã„å ´åˆ
         if (dialogData == null ||
             dialogData.MessgeLines == null ||
             dialogData.MessgeLines.Length == 0)
         {
-            Debug.LogWarning("DialogData‚ª•s³‚Å‚·");
+            Debug.LogWarning("DialogDataç„¡åŠ¹ã§ã™");
             return;
         }
 
-        // bool‚Ì’l‚ğ’¼ÚGameObject‚ÌActive‚Ì’l‚É•ÏX‚·‚é
+        // boolã®å€¤ã‚’ç›´æ¥GameObjectã®Activeã®å€¤ã«å¤‰æ›´
         YesNoButtonBG.SetActive(dialogData.ShowYesNo);
 
         GameState.IsDialogOpen = true;
@@ -84,23 +84,23 @@ public class DialogUI : MonoBehaviour
         lineIndex = 0;
 
         Panel.SetActive(true);
-        // Œ»İ‚Ìs‚ğ•\¦‚µ‚Ä‚¢‚­
+        // æœ€åˆã®è¡Œã‚’è¡¨ç¤º
         ShowLine(lineIndex);
     }
 
     /// <summary>
-    /// ŠO•”‚©‚çƒAƒCƒeƒ€æ“¾‚Ìƒ_ƒCƒAƒƒO‚ğŒ©‚¹‚é
+    /// éµã‚„ã‚¢ã‚¤ãƒ†ãƒ å–å¾—æ™‚ã®ãƒ€ã‚¤ã‚¢ãƒ­ã‚°è¡¨ç¤º
     /// </summary>
     public void ShowItemDialog(string dialogMessage)
     {
-        // dialogMessage‚ª–³‚©‚Á‚½‚ç
+        // dialogMessageç©º
         if (dialogMessage == string.Empty)
         {
-            Debug.LogWarning("dialogMessage‚ª‚È‚¢‚Å‚·");
+            Debug.LogWarning("dialogMessageç©ºã§ã™");
             return;
         }
 
-        // YesNoƒ{ƒ^ƒ“‚Í•\¦‚µ‚Ü‚¹‚ñ
+        // YesNoãƒœã‚¿ãƒ³ã¯è¡¨ç¤ºã—ãªã„
         YesNoButtonBG.SetActive(false);
 
         GameState.IsDialogOpen = true;
@@ -108,28 +108,28 @@ public class DialogUI : MonoBehaviour
         NameText.text = string.Empty;
 
         string[] itemLines = new string[1];
-        itemLines[0] = $"{dialogMessage}‚ğ@è‚É“ü‚ê‚½" ;
+        itemLines[0] = $"{dialogMessage}ã€€ã‚’æ‰‹ã«å…¥ã‚ŒãŸ" ;
         currentLines = itemLines;
         lineIndex = 0;
 
         Panel.SetActive(true);
-        // Œ»İ‚Ìs‚ğ•\¦‚µ‚Ä‚¢‚­
+        // æœ€åˆã®è¡Œã‚’è¡¨ç¤º
         ShowLine(lineIndex);
     }
 
     /// <summary>
-    /// ŠO•”‚©‚çƒ_ƒCƒAƒƒO‚ğŒ©‚¹‚é
+    /// çœ‹æ¿ãªã©ã®å˜ä¸€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°
     /// </summary>
     public void ShowSimpleMessage(string dialogMessage)
     {
-        // dialogMessage‚ª–³‚©‚Á‚½‚ç
+        // dialogMessageç©º
         if (dialogMessage == string.Empty)
         {
-            Debug.LogWarning("dialogMessage‚ª‚È‚¢‚Å‚·");
+            Debug.LogWarning("dialogMessageç©ºã§ã™");
             return;
         }
 
-        // YesNoƒ{ƒ^ƒ“‚Í•\¦‚µ‚Ü‚¹‚ñ
+        // YesNoãƒœã‚¿ãƒ³ã¯è¡¨ç¤ºã—ãªã„
         YesNoButtonBG.SetActive(false);
 
         GameState.IsDialogOpen = true;
@@ -142,7 +142,7 @@ public class DialogUI : MonoBehaviour
         lineIndex = 0;
 
         Panel.SetActive(true);
-        // Œ»İ‚Ìs‚ğ•\¦‚µ‚Ä‚¢‚­
+        // æœ€åˆã®è¡Œã‚’è¡¨ç¤º
         ShowLine(lineIndex);
     }
 
@@ -150,11 +150,11 @@ public class DialogUI : MonoBehaviour
 
 
     /// <summary>
-    /// UI‚ÌCloseƒ{ƒ^ƒ“‚©‚çŒÄ‚Ñ‚Ü‚·
+    /// UIã‚’Closeã—ã¦ã€çŠ¶æ…‹ã‚’æˆ»ã™
     /// </summary>
     public void Close()
     {
-        // ‚Ü‚¸•¶š‘—‚è‚ğ~‚ß‚Ä
+        // ã¾ãšæ­¢ã‚ã‚‹
         StopTypingIfNeeded();
         GameState.IsDialogOpen = false;
         Panel.SetActive(false);
@@ -167,24 +167,24 @@ public class DialogUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ‰ï˜b’†‚ÌŸ‚Ö‚Ì“ü—Í
+    /// æ¬¡ã®ä¼šè©±ã¸ã®é·ç§»
     /// </summary>
     public void Next()
     {
-        // ƒpƒlƒ‹‚ª—LŒø‚¶‚á‚È‚©‚Á‚½‚ç
+        // ãƒ‘ãƒãƒ«é–‹ã„ã¦ãªã„
         if (!Panel.activeSelf)
         {
             return;
         }
-        // •¶š‘—‚è’†‚È‚ç
+        // ã‚¿ã‚¤ãƒ—ä¸­ãªã‚‰
         if (isTyping)
         {
-            // ‘¦•\¦
+            // å³è¡¨ç¤º
             FinishCurrentLineInstant();
             return;
         }
-        // Ÿ‚Ìs‚Ö
-        lineIndex++; // ƒCƒ“ƒNƒŠƒƒ“ƒg(n+1‚·‚é‚±‚Æ)
+        // æ¬¡ã®è¡Œã¸
+        lineIndex++; // ã‚¤ãƒ³ã‚¯ãƒªãƒ¡ãƒ³ãƒˆ(n+1ã™ã‚‹ã“ã¨)
 
         if (currentLines != null &&
             lineIndex < currentLines.Length)
@@ -198,16 +198,16 @@ public class DialogUI : MonoBehaviour
     }
 
     /// <summary>
-    /// indexs–Ú‚ğ•\¦‚·‚é
+    /// indexè¡Œç›®ã®æ–‡å­—ã‚’è¡¨ç¤º
     /// </summary>
     /// <param name="index"></param>
     private void ShowLine(int index)
     {
-        // ‚Ü‚¸•¶š‘—‚è‚ğ~‚ß‚Ä
+        // ã¾ãšæ­¢ã‚ã‚‹
         StopTypingIfNeeded();
-        // ¡•\¦‚³‚ê‚Ä‚é‚à‚Ì‚ğ‹ó‚É‚µ‚Ü‚·
+        // è¡¨ç¤ºã™ã‚‹å‰ã«ç©ºã«ã™ã‚‹
         MessageText.text = string.Empty;
-        // ¥‚È‚Ç‚Ì‘—‚è•\¦‚ÌƒIƒuƒWƒFƒNƒg‚ª‚ ‚ê‚Î•\¦‚µ‚Ü‚·
+        // æ¬¡ãŒã‚ã‚‹è¡¨ç¤ºã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ»éè¡¨ç¤º
         if (NextHint != null)
         {
             NextHint.SetActive(true);
@@ -217,14 +217,14 @@ public class DialogUI : MonoBehaviour
             StartCoroutine(TypeLine(currentLines[index]));
     }
     /// <summary>
-    /// •¶š‘—‚è‚ğs‚¤
+    /// æ–‡å­—é€ã‚Šã‚³ãƒ«ãƒ¼ãƒãƒ³
     /// </summary>
     /// <param name="line"></param>
     /// <returns></returns>
     private IEnumerator TypeLine(string line)
     {
         isTyping = true;
-        // ˆø”‚Ìs‚Ì’†‚Ì1•¶š‚ğæ‚èo‚µ‚Ä‚¢‚­
+        // ï¼‘æ–‡å­—ãšã¤å‡ºã—ã¦å¾…ã¤
         foreach (char c in line)
         {
             MessageText.text += c;
@@ -236,7 +236,7 @@ public class DialogUI : MonoBehaviour
         {
             NextHint.SetActive(true);
         }
-        // ©“®‚ÅŸ‚Ìs‚Ös‚­‚æ‚¤‚É
+        // è‡ªå‹•ã§æ¬¡ã®è¡Œã¸ç§»è¡Œã‚ˆã†
         // Next();
         typingCoroutine = null;
     }
@@ -247,11 +247,11 @@ public class DialogUI : MonoBehaviour
         {
             return;
         }
-        // ‚Ü‚¸•¶š‘—‚è‚ğ~‚ß‚Ä
+        // ã¾ãšæ­¢ã‚ã‚‹
         StopTypingIfNeeded();
-        // Œ»İ‚Ìs‚ğ‘S‚Ä•\¦
+        // ç¾åœ¨ã®è¡Œã‚’å…¨è¡¨ç¤º
         MessageText.text = currentLines[lineIndex];
-        // •¶š‘—‚è’†‚¶‚á‚È‚­‚·
+        // ã‚¿ã‚¤ãƒ—ä¸­çµ‚äº†
         isTyping = false;
         if (NextHint != null)
         {
@@ -260,7 +260,7 @@ public class DialogUI : MonoBehaviour
     }
 
     /// <summary>
-    /// •K—v‚¾‚Á‚½‚ç•¶š‘—‚è‚ğ~‚ß‚é
+    /// å¿…è¦ãªã‚‰ã‚³ãƒ«ãƒ¼ãƒãƒ³ã‚’æ­¢ã‚ã‚‹
     /// </summary>
     private void StopTypingIfNeeded()
     {
@@ -272,17 +272,17 @@ public class DialogUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ_ƒCƒAƒƒOUI‚ªŠJ‚¢‚Ä‚¢‚½‚çŸ‚Ìs‚ğ•\¦‚·‚é
+    /// ãƒ€ã‚¤ã‚¢ãƒ­ã‚°UIãŒé–‹ã„ã¦ã„ã‚Œã°æ¬¡ã®è¡Œã‚’è¡¨ç¤º
     /// </summary>
     /// <returns></returns>
     public bool TryNextIfOpen()
     {
-        // ƒ_ƒCƒAƒƒO‚ªŠJ‚¢‚Ä‚¢‚È‚¯‚ê‚Î‰½‚à‚µ‚È‚¢
+        // ãƒ€ã‚¤ã‚¢ãƒ­ã‚°é–‹ã„ã¦ãªã‘ã‚Œã°åå¿œã—ãªã„
         if (!Panel.activeSelf)
         {
             return false;
         }
-        // ‚±‚±‚Å Next ‚Æ‘S‚­“¯‚¶‹““®
+        // é€šå¸¸ã® Next ã¨åŒã˜æŒ™å‹•
         Next();
         return true;
     }

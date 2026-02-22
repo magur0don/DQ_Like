@@ -6,12 +6,12 @@ public class EnemySymbol : MonoBehaviour
     private string BattleSceneName = "BattleScene";
 
     /// <summary>
-    /// N“ü”»’è‚ÅPlayer‚ª“ü‚Á‚Ä‚«‚½‚Æ‚«‚Éˆ—‚ğs‚¤
+    /// ä¾µå…¥åˆ¤å®šã§PlayerãŒå…¥ã£ã¦ããŸã¨ãã«å‡¦ç†ã‚’è¡Œã†
     /// </summary>
     /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
-        // Player‚ÌTagˆÈŠO‚ÌGameObject‚ªN“ü‚µ‚Ä‚«‚½‚ç‰½‚à‚µ‚È‚¢
+        // Playerã®Tagä»¥å¤–ã®GameObjectãŒä¾µå…¥ã—ã¦ããŸã‚‰ä½•ã‚‚ã—ãªã„
         if (!other.CompareTag("Player"))
         {
             return;

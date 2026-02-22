@@ -2,6 +2,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 
+public enum BattleMenuState
+{
+    Root,   // たたかう/さくせん/にげる
+    Fight,  // こうげき/じゅもん/とくぎ/ぼうぎょ
+    Busy    // 演出中(入力不可)
+}
+
+
 public class BattleManager : MonoBehaviour
 {
     public static int NextEnemyID = 0;
@@ -10,7 +18,11 @@ public class BattleManager : MonoBehaviour
     public EnemyDatabase EnemyDB;
     private EnemyData currentEnemy;
 
-    [Header("PlayerData(��)")]
+    [Header("Enemy Visual")]
+    public Transform EnemyModelRoot;
+    private GameObject enemyModelInstance;
+
+    [Header("PlayerData(仮)")]
     public float PlayerMaxHP = 30f;
     public float PlayerHP = 30;
     public float PlayerAttackMin = 5;
@@ -25,6 +37,21 @@ public class BattleManager : MonoBehaviour
     public TextMeshProUGUI EnemyHPText;
     public TextMeshProUGUI DialogText;
 
+    [Header("DQ Like Menu")]
+    public GameObject RootMenuPanel;
+    public Transform RootMenuRoot;
+    public GameObject FightMenuPanel;
+    public Transform FightMenuRoot;
+
+    public MenuButton MenuButtonPrefab;
+
+    private BattleMenuState menuState =
+        BattleMenuState.Root;
+    private bool isGuading = false;
+
+
+
+
     private bool isPlayerTurn = true;
 
 
@@ -32,15 +59,21 @@ public class BattleManager : MonoBehaviour
     {
         SetupEnemyFromDB();
         UpdateUI();
+
+        BuildRootMenu();
+
+        // 戦闘の開始時に生成も行う
+        SpawnEnemyModel();
+
         DialogText.text =
-            $"{currentEnemy.DisplayName} �����ꂽ�I"; 
+            $"{currentEnemy.DisplayName} が現れた！";
     }
 
     private void SetupEnemyFromDB()
     {
         if (EnemyDB == null)
         {
-            Debug.LogError("EnemyDB���ݒ肳��Ă��܂���");
+            Debug.LogError("EnemyDB設定されてません");
             return;
         }
 
@@ -48,7 +81,7 @@ public class BattleManager : MonoBehaviour
 
         if (currentEnemy == null)
         {
-            Debug.LogError("NextEnemyID��EnemyDB�Ɍ�����܂���");
+            Debug.LogError("NextEnemyIDがEnemyDBに見つかりません");
             return;
         }
 
@@ -56,11 +89,276 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// UnityEditor���AttackButton��OnClick�ɐݒ�
+    /// 敵のVisualを生成
+    /// </summary>
+    private void SpawnEnemyModel()
+    {
+        if (EnemyModelRoot == null)
+        {
+            return;
+        }
+        if (currentEnemy == null)
+        {
+            return;
+        }
+        if (currentEnemy.ModelPrefab == null)
+        {
+            return;
+        }
+        // ゲーム開始時に既に敵のモデルがあった場合、削除
+        if (enemyModelInstance != null)
+        {
+            Destroy(enemyModelInstance);
+        }
+        // Instantiateを使って、敵のモデルを、EnemyModelRootに生成
+        enemyModelInstance = Instantiate(currentEnemy.ModelPrefab,
+            EnemyModelRoot);
+        // 敵の位置情報を設定
+        enemyModelInstance.transform.localPosition =
+            currentEnemy.ModelPosition;
+        enemyModelInstance.transform.localEulerAngles =
+            currentEnemy.ModelRotation;
+        enemyModelInstance.transform.localScale =
+            currentEnemy.ModelScale;
+    }
+
+    private void SetMenuState(BattleMenuState state)
+    {
+        menuState = state;
+        // Rootのメニューパネルの表示
+        if (RootMenuPanel != null)
+        {
+            RootMenuPanel.SetActive(
+                state == BattleMenuState.Root);
+        }
+        // 戦闘パネルの表示
+        if (FightMenuPanel != null)
+        {
+            FightMenuPanel.SetActive(
+                state == BattleMenuState.Fight);
+        }
+
+        if (state == BattleMenuState.Busy)
+        {
+            if (RootMenuPanel != null)
+            {
+                RootMenuPanel.SetActive(false);
+            }
+            if (FightMenuPanel != null)
+            {
+                FightMenuPanel.SetActive(false);
+            }
+        }
+    }
+
+    private void BuildRootMenu()
+    {
+        // RootMenuの子の階層にあるgameObjectを削除します
+        ClearChildren(RootMenuRoot);
+
+        CreateButton(RootMenuRoot, "たたかう", () =>
+        {
+            if (!isPlayerTurn)
+            {
+                return;
+            }
+
+            // たたかうメニューを設定します
+            BuildFightMenu();
+            SetMenuState(BattleMenuState.Fight);
+            DialogText.text = "どうする？";
+        });
+
+        CreateButton(RootMenuRoot, "さくせん", () =>
+        {
+            if (!isPlayerTurn)
+            {
+                return;
+            }
+            DialogText.text = "さくせんは　まだ　つかえない！";
+        });
+        CreateButton(RootMenuRoot, "にげる", () =>
+        {
+
+            if (!isPlayerTurn)
+            {
+                return;
+            }
+            StartCoroutine(TryEscape());
+        });
+    }
+    private void BuildFightMenu()
+    {
+        ClearChildren(FightMenuRoot);
+        CreateButton(FightMenuRoot, "こうげき", () =>
+        {
+            if (!isPlayerTurn)
+            {
+                return;
+            }
+            StartCoroutine(ExecuteAttack());
+        });
+        CreateButton(FightMenuRoot, "じゅもん", () =>
+        {
+            if (!isPlayerTurn)
+            {
+                return;
+            }
+            StartCoroutine(ExecuteHealSpell());
+        });
+        CreateButton(FightMenuRoot, "とくぎ", () =>
+        {
+            if (!isPlayerTurn)
+            {
+                return;
+            }
+            StartCoroutine(ExecutePowerSkill());
+        });
+        CreateButton(FightMenuRoot, "ぼうぎょ", () =>
+        {
+            if (!isPlayerTurn)
+            {
+                return;
+            }
+            StartCoroutine(ExecuteGuard());
+        });
+        CreateButton(FightMenuRoot, "もどる", () =>
+        {
+            SetMenuState(BattleMenuState.Root);
+            DialogText.text = "どうする？";
+        });
+    }
+
+    // こうげきの処理
+    private System.Collections.IEnumerator ExecuteAttack()
+    {
+        isPlayerTurn = false;
+        SetMenuState(BattleMenuState.Busy);
+
+        DialogText.text = "こうげき！";
+        yield return new WaitForSeconds(0.5f);
+        // ダメージ計算で小数点切り上げ
+        var damage =
+            Mathf.Ceil(
+                Random.Range(PlayerAttackMin, PlayerAttackMax)
+                );
+        EnemyHP -= damage;
+        DialogText.text = $"{damage} のダメージ！";
+        UpdateUI();
+        yield return new WaitForSeconds(0.8f);
+        if (EnemyHP <= 0)
+        {
+            Victory();
+            yield break;
+        }
+        StartCoroutine(EnemyTurn());
+    }
+
+    // じゅもんの処理
+    private System.Collections.IEnumerator ExecuteHealSpell()
+    {
+        isPlayerTurn = false;
+        SetMenuState(BattleMenuState.Busy);
+        DialogText.text = "キュア！";
+        yield return new WaitForSeconds(0.6f);
+
+        float heal = Mathf.CeilToInt(PlayerMaxHP * 0.25f) + 2;
+        // mathf.Min(A,B)でどちらか小さいほうの値を取得できる
+        PlayerHP = Mathf.Min(PlayerMaxHP, PlayerHP + heal);
+
+        DialogText.text = $"{heal} かいふく！";
+        UpdateUI();
+        yield return new WaitForSeconds(0.8f);
+        StartCoroutine(EnemyTurn());
+    }
+
+    // とくぎのしょり
+    private System.Collections.IEnumerator ExecutePowerSkill()
+    {
+        isPlayerTurn = false;
+        SetMenuState(BattleMenuState.Busy);
+        DialogText.text = "つよく きりつけた！";
+        yield return new WaitForSeconds(0.6f);
+        // ダメージ計算で小数点切り上げ
+        var damage =
+            Mathf.Ceil(
+                Random.Range(PlayerAttackMin, PlayerAttackMax) * 1.6f + 2
+                );
+        EnemyHP -= damage;
+        DialogText.text = $"{damage} のダメージ！";
+        UpdateUI();
+        yield return new WaitForSeconds(0.8f);
+        if (EnemyHP <= 0)
+        {
+            Victory();
+            yield break;
+        }
+        StartCoroutine(EnemyTurn());
+
+    }
+    private System.Collections.IEnumerator ExecuteGuard()
+    {
+        isPlayerTurn = false;
+        SetMenuState(BattleMenuState.Busy);
+
+        // 防御用のフラグを立てる
+        isGuading = true;
+        DialogText.text = "みを まもっている！";
+        yield return new WaitForSeconds(0.8f);
+        StartCoroutine(EnemyTurn());
+    }
+
+    private System.Collections.IEnumerator TryEscape()
+    {
+        // Random.valueは0~1の間の値をランダムに返してくれます
+        bool success = Random.value < 0.5f;
+        if (success)
+        {
+            DialogText.text = "うまく にげきれた！";
+            Invoke(nameof(ReturnToField), 1.2f);
+        }
+        else
+        {
+            DialogText.text = "まわりこまれてしまった！";
+            isPlayerTurn = false;
+            SetMenuState(BattleMenuState.Busy);
+            yield return new WaitForSeconds(0.8f);
+            StartCoroutine(EnemyTurn());
+        }
+    }
+
+    /// <summary>
+    /// Buttonを生成
+    /// </summary>
+    void CreateButton(Transform root, string label,
+        System.Action onClick)
+    {
+        if (MenuButtonPrefab == null || root == null)
+        {
+            return;
+        }
+        var btn = Instantiate(MenuButtonPrefab, root);
+        btn.Setup(label, onClick);
+    }
+
+    void ClearChildren(Transform root)
+    {
+        if (root == null)
+        {
+            return;
+        }
+        for (int i = root.childCount - 1; i >= 0; i--)
+        {
+            Destroy(root.GetChild(i).gameObject);
+        }
+    }
+
+    /// <summary>
+    /// UnityEditorでAttackButtonのOnClickに設定
     /// </summary>
     public void OnAttackButton()
     {
-        // �v���C���[�̃^�[������Ȃ������牽�����܂���
+        // プレイヤーのターンでなければ何もしない
         if (!isPlayerTurn)
         {
             return;
@@ -72,50 +370,57 @@ public class BattleManager : MonoBehaviour
     {
         isPlayerTurn = false;
 
-        DialogText.text = "�v���C���[�̍U���I";
+        DialogText.text = "プレイヤーの攻撃！";
 
-        // 1�b�҂�
+        // 1秒待つ
         yield return new WaitForSeconds(1f);
-        // �_���[�W�v�Z�ŏ����_�؂�グ
+        // ダメージ計算で小数点切り上げ
         var damage =
             Mathf.Ceil(
                 Random.Range(PlayerAttackMin, PlayerAttackMax)
                 );
         EnemyHP -= damage;
 
-        DialogText.text = $"{damage} �_���[�W�I";
+        DialogText.text = $"{damage} のダメージ！";
 
         UpdateUI();
 
         yield return new WaitForSeconds(1f);
 
-        // EnemyHP�����؂ꂽ��
+        // EnemyHP切れたら勝利
         if (EnemyHP <= 0f)
         {
-            // ����
+            // 勝利
             Victory();
         }
         else
-        { // ��������Ȃ�������퓬���s
+        { // 生きていれば敵行動へ
             StartCoroutine(EnemyTurn());
         }
     }
 
     private System.Collections.IEnumerator EnemyTurn()
     {
-        DialogText.text = $"{currentEnemy.DisplayName} �̍U���I";
+        DialogText.text = $"{currentEnemy.DisplayName} の攻撃！";
 
         yield return new WaitForSeconds(1f);
 
-        // �����_�؂�グ�œG����̃_���[�W���v�Z����
+        // 小数点切り上げで敵のダメージ計算仮
         var damage = Mathf.Ceil(
                 Random.Range(currentEnemy.AttackMin,
                 currentEnemy.AttackMax)
                 );
 
+        // Playerが防御中
+        if (isGuading)
+        {
+            damage = Mathf.Ceil(damage * 0.5f);
+            isGuading = false;
+        }
+
         PlayerHP -= damage;
 
-        DialogText.text = $"{damage} �_���[�W�I";
+        DialogText.text = $"{damage} のダメージ！";
 
         UpdateUI();
 
@@ -123,18 +428,19 @@ public class BattleManager : MonoBehaviour
 
         if (PlayerHP <= 0f)
         {
-            // �s�k
+            // 敗北
             GameOver();
         }
         else
         {
             isPlayerTurn = true;
-            DialogText.text = "�ǂ�����H";
+            SetMenuState(BattleMenuState.Root);
+            DialogText.text = "どうする？";
         }
     }
 
     /// <summary>
-    /// HP�Ȃǂ�UI�̍X�V
+    /// HPなどのUIの更新
     /// </summary>
     private void UpdateUI()
     {
@@ -154,12 +460,12 @@ public class BattleManager : MonoBehaviour
 
     private void Victory()
     {
-        DialogText.text = "�����I";
-        Invoke(nameof(ReturnToField),2f);
+        DialogText.text = "勝利！";
+        Invoke(nameof(ReturnToField), 2f);
     }
     private void GameOver()
     {
-        DialogText.text = "�S�ł����c�c";
+        DialogText.text = "全滅です……";
         Invoke(nameof(ReturnToField), 2f);
     }
     private void ReturnToField()
