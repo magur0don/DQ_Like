@@ -21,6 +21,7 @@ public class BattleManager : MonoBehaviour
     [Header("Enemy Visual")]
     public Transform EnemyModelRoot;
     private GameObject enemyModelInstance;
+    private EnemyAnimator enemyAnimator;
 
     [Header("PlayerData(仮)")]
     public float PlayerMaxHP = 30f;
@@ -120,6 +121,13 @@ public class BattleManager : MonoBehaviour
             currentEnemy.ModelRotation;
         enemyModelInstance.transform.localScale =
             currentEnemy.ModelScale;
+
+        // EnemyAnimatorを取得（なければ追加）
+        enemyAnimator = enemyModelInstance.GetComponent<EnemyAnimator>();
+        if (enemyAnimator == null)
+        {
+            enemyAnimator = enemyModelInstance.AddComponent<EnemyAnimator>();
+        }
     }
 
     private void SetMenuState(BattleMenuState state)
@@ -403,6 +411,11 @@ public class BattleManager : MonoBehaviour
     {
         DialogText.text = $"{currentEnemy.DisplayName} の攻撃！";
 
+        if (enemyAnimator != null)
+        {
+            enemyAnimator.PlayAttack();
+        }
+
         yield return new WaitForSeconds(1f);
 
         // 小数点切り上げで敵のダメージ計算仮
@@ -461,6 +474,12 @@ public class BattleManager : MonoBehaviour
     private void Victory()
     {
         DialogText.text = "勝利！";
+
+        if (enemyAnimator != null)
+        {
+            enemyAnimator.PlayDie();
+        }
+
         Invoke(nameof(ReturnToField), 2f);
     }
     private void GameOver()
