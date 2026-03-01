@@ -79,8 +79,8 @@ public class BattleManager : MonoBehaviour
             $"{currentEnemy.DisplayName} が現れた！";
     }
 
-    //データからプレイヤーの値を反映する
-    private void ApplyPlayerStatus()
+    /// データからプレイヤーの値を反映する
+    public void ApplyPlayerStatus()
     {
         if (PlayerStatus == null)
         {
@@ -90,7 +90,7 @@ public class BattleManager : MonoBehaviour
         PlayerHP = Mathf.Min(PlayerHP, PlayerMaxHP);
         PlayerAttackMin = PlayerStatus.AttackMin;
         PlayerAttackMax = PlayerStatus.AttackMax;
-
+        Debug.Log($"{PlayerAttackMax}");
     }
 
 
@@ -480,7 +480,7 @@ public class BattleManager : MonoBehaviour
     /// <summary>
     /// HPなどのUIの更新
     /// </summary>
-    private void UpdateUI()
+    public void UpdateUI()
     {
         PlayerHPText.text = $"HP:{PlayerHP}/{PlayerMaxHP}";
         if (currentEnemy != null)
