@@ -1110,6 +1110,55 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8016762339155479422, guid: ebf1042d903858a47a4b3f06f41c9324, type: 3}
   m_PrefabInstance: {fileID: 1107011368}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1195642383
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1195642384}
+  - component: {fileID: 1195642385}
+  m_Layer: 0
+  m_Name: LevelSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1195642384
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195642383}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1195642385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195642383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53ff54bab86709042befa8d1a0a03ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Status: {fileID: 11400000, guid: 522c094b68ecc2a4197755a564792819, type: 2}
+  ExpTable: {fileID: 11400000, guid: 37f231d2bc718c54ab7e3ec54a9f88ef, type: 2}
+  HpUpPerLevel: 5
+  AttackMinUpPerLevel: 1
+  AttackMaxUpPerLevel: 1
 --- !u!1001 &1237045486
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1614,6 +1663,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EnemyDB: {fileID: 11400000, guid: 796d2d603f8315e4e99ad8635dea62c7, type: 2}
   EnemyModelRoot: {fileID: 1808086282}
+  PlayerStatus: {fileID: 11400000, guid: 522c094b68ecc2a4197755a564792819, type: 2}
+  LevelSystem: {fileID: 1195642385}
   PlayerMaxHP: 30
   PlayerHP: 30
   PlayerAttackMin: 5
@@ -2350,3 +2401,4 @@ SceneRoots:
   - {fileID: 1503341925}
   - {fileID: 1644641810}
   - {fileID: 1808086282}
+  - {fileID: 1195642384}
