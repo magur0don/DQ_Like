@@ -12,31 +12,39 @@ public enum BattleMenuState
 
 public class BattleManager : MonoBehaviour
 {
-    public static int NextEnemyID = 0;
+    public static int[] NextEnemyIDs = new int[] { 0 ,0};
 
     [Header("EnemyData")]
     public EnemyDatabase EnemyDB;
-    private EnemyData currentEnemy;
+    private System.Collections.Generic.List<EnemyBattleInfo> enemies = new System.Collections.Generic.List<EnemyBattleInfo>();
 
     [Header("Enemy Visual")]
     public Transform EnemyModelRoot;
-    private GameObject enemyModelInstance;
-    private EnemyAnimator enemyAnimator;
 
-    [Header("PlayerData(仮)")]
+
+    [Header("PlayerStatusとLevelSystemの参照")]
+    public PlayerStatus PlayerStatus;
+    public LevelSystem LevelSystem;
+
+    [Header("PlayerData")]
     public float PlayerMaxHP = 30f;
     public float PlayerHP = 30;
     public float PlayerAttackMin = 5;
     public float PlayerAttackMax = 10;
+
+
 
     [Header("Enemy HP")]
     public float EnemyHP;
 
     [Header("UI")]
     public TextMeshProUGUI PlayerHPText;
-    public TextMeshProUGUI EnemyNameText;
-    public TextMeshProUGUI EnemyHPText;
     public TextMeshProUGUI DialogText;
+
+    [Header("Enemy Status UI")]
+    public EnemyStatusUI EnemyStatusUIPrefab;
+    public Transform EnemyStatusUIRoot;
+    private System.Collections.Generic.List<EnemyStatusUI> enemyStatusUIs = new System.Collections.Generic.List<EnemyStatusUI>();
 
     [Header("DQ Like Menu")]
     public GameObject RootMenuPanel;
@@ -58,19 +66,43 @@ public class BattleManager : MonoBehaviour
 
     void Start()
     {
-        SetupEnemyFromDB();
+        SetupEnemiesFromDB();
+        ApplyPlayerStatus();
+
         UpdateUI();
 
         BuildRootMenu();
 
         // 戦闘の開始時に生成も行う
-        SpawnEnemyModel();
+        SpawnEnemyModels();
 
-        DialogText.text =
-            $"{currentEnemy.DisplayName} が現れた！";
+        if (enemies.Count > 1)
+        {
+            DialogText.text = "まものたちが あらわれた！";
+        }
+        else if (enemies.Count == 1)
+        {
+            DialogText.text = $"{enemies[0].Data.DisplayName} が現れた！";
+        }
     }
 
-    private void SetupEnemyFromDB()
+    /// データからプレイヤーの値を反映する
+    public void ApplyPlayerStatus()
+    {
+        if (PlayerStatus == null)
+        {
+            return;
+        }
+        PlayerMaxHP = PlayerStatus.MaxHP;
+        PlayerHP = Mathf.Min(PlayerHP, PlayerMaxHP);
+        PlayerAttackMin = PlayerStatus.AttackMin;
+        PlayerAttackMax = PlayerStatus.AttackMax;
+        Debug.Log($"{PlayerAttackMax}");
+    }
+
+
+
+    private void SetupEnemiesFromDB()
     {
         if (EnemyDB == null)
         {
@@ -78,55 +110,60 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        currentEnemy = EnemyDB.GetByID(NextEnemyID);
-
-        if (currentEnemy == null)
+        enemies.Clear();
+        foreach (var id in NextEnemyIDs)
         {
-            Debug.LogError("NextEnemyIDがEnemyDBに見つかりません");
-            return;
+            var data = EnemyDB.GetByID(id);
+            if (data != null)
+            {
+                enemies.Add(new EnemyBattleInfo(data));
+            }
         }
 
-        EnemyHP = currentEnemy.MaxHP;
+        if (enemies.Count == 0)
+        {
+            Debug.LogError("敵が1体もみつかりませんでした");
+        }
     }
 
     /// <summary>
     /// 敵のVisualを生成
     /// </summary>
-    private void SpawnEnemyModel()
+    private void SpawnEnemyModels()
     {
         if (EnemyModelRoot == null)
         {
             return;
         }
-        if (currentEnemy == null)
-        {
-            return;
-        }
-        if (currentEnemy.ModelPrefab == null)
-        {
-            return;
-        }
-        // ゲーム開始時に既に敵のモデルがあった場合、削除
-        if (enemyModelInstance != null)
-        {
-            Destroy(enemyModelInstance);
-        }
-        // Instantiateを使って、敵のモデルを、EnemyModelRootに生成
-        enemyModelInstance = Instantiate(currentEnemy.ModelPrefab,
-            EnemyModelRoot);
-        // 敵の位置情報を設定
-        enemyModelInstance.transform.localPosition =
-            currentEnemy.ModelPosition;
-        enemyModelInstance.transform.localEulerAngles =
-            currentEnemy.ModelRotation;
-        enemyModelInstance.transform.localScale =
-            currentEnemy.ModelScale;
 
-        // EnemyAnimatorを取得（なければ追加）
-        enemyAnimator = enemyModelInstance.GetComponent<EnemyAnimator>();
-        if (enemyAnimator == null)
+        // 既存のモデルを削除
+        ClearChildren(EnemyModelRoot);
+
+        for (int i = 0; i < enemies.Count; i++)
         {
-            enemyAnimator = enemyModelInstance.AddComponent<EnemyAnimator>();
+            var enemy = enemies[i];
+            if (enemy.Data.ModelPrefab == null) continue;
+
+            // Instantiateを使って、敵のモデルを、EnemyModelRootに生成
+            GameObject instance = Instantiate(enemy.Data.ModelPrefab, EnemyModelRoot);
+            enemy.ModelInstance = instance;
+
+            // 敵の位置情報を設定 (複数体の場合は横に並べるなどの調整が必要)
+            // 仮でX座標をずらす
+            float xOffset = (enemies.Count > 1) ? (i - (enemies.Count - 1) * 0.5f) * 2.0f : 0;
+            Vector3 pos = enemy.Data.ModelPosition;
+            pos.x += xOffset;
+
+            instance.transform.localPosition = pos;
+            instance.transform.localEulerAngles = enemy.Data.ModelRotation;
+            instance.transform.localScale = enemy.Data.ModelScale;
+
+            // EnemyAnimatorを取得（なければ追加）
+            enemy.Animator = instance.GetComponent<EnemyAnimator>();
+            if (enemy.Animator == null)
+            {
+                enemy.Animator = instance.AddComponent<EnemyAnimator>();
+            }
         }
     }
 
@@ -222,7 +259,10 @@ public class BattleManager : MonoBehaviour
             {
                 return;
             }
-            StartCoroutine(ExecuteAttack());
+            // ターゲット選択メニューを表示
+            BuildTargetMenu((target) => {
+                StartCoroutine(ExecuteAttack(target));
+            });
         });
         CreateButton(FightMenuRoot, "じゅもん", () =>
         {
@@ -238,7 +278,10 @@ public class BattleManager : MonoBehaviour
             {
                 return;
             }
-            StartCoroutine(ExecutePowerSkill());
+            // ターゲット選択メニューを表示
+            BuildTargetMenu((target) => {
+                StartCoroutine(ExecutePowerSkill(target));
+            });
         });
         CreateButton(FightMenuRoot, "ぼうぎょ", () =>
         {
@@ -255,24 +298,48 @@ public class BattleManager : MonoBehaviour
         });
     }
 
+    private void BuildTargetMenu(System.Action<EnemyBattleInfo> onSelected)
+    {
+        ClearChildren(FightMenuRoot);
+        foreach (var enemy in enemies)
+        {
+            if (enemy.IsDead) continue;
+            
+            CreateButton(FightMenuRoot, enemy.Data.DisplayName, () => {
+                onSelected?.Invoke(enemy);
+            });
+        }
+        CreateButton(FightMenuRoot, "もどる", () => {
+            BuildFightMenu();
+        });
+    }
+
     // こうげきの処理
-    private System.Collections.IEnumerator ExecuteAttack()
+    private System.Collections.IEnumerator ExecuteAttack(EnemyBattleInfo target)
     {
         isPlayerTurn = false;
         SetMenuState(BattleMenuState.Busy);
 
-        DialogText.text = "こうげき！";
+        DialogText.text = $"{target.Data.DisplayName} に こうげき！";
         yield return new WaitForSeconds(0.5f);
         // ダメージ計算で小数点切り上げ
         var damage =
             Mathf.Ceil(
                 Random.Range(PlayerAttackMin, PlayerAttackMax)
                 );
-        EnemyHP -= damage;
+        target.CurrentHP -= damage;
         DialogText.text = $"{damage} のダメージ！";
         UpdateUI();
         yield return new WaitForSeconds(0.8f);
-        if (EnemyHP <= 0)
+
+        if (target.IsDead)
+        {
+            DialogText.text = $"{target.Data.DisplayName} を たおした！";
+            if (target.Animator != null) target.Animator.PlayDie();
+            yield return new WaitForSeconds(0.8f);
+        }
+
+        if (CheckVictory())
         {
             Victory();
             yield break;
@@ -299,7 +366,7 @@ public class BattleManager : MonoBehaviour
     }
 
     // とくぎのしょり
-    private System.Collections.IEnumerator ExecutePowerSkill()
+    private System.Collections.IEnumerator ExecutePowerSkill(EnemyBattleInfo target)
     {
         isPlayerTurn = false;
         SetMenuState(BattleMenuState.Busy);
@@ -310,11 +377,19 @@ public class BattleManager : MonoBehaviour
             Mathf.Ceil(
                 Random.Range(PlayerAttackMin, PlayerAttackMax) * 1.6f + 2
                 );
-        EnemyHP -= damage;
+        target.CurrentHP -= damage;
         DialogText.text = $"{damage} のダメージ！";
         UpdateUI();
         yield return new WaitForSeconds(0.8f);
-        if (EnemyHP <= 0)
+
+        if (target.IsDead)
+        {
+            DialogText.text = $"{target.Data.DisplayName} を たおした！";
+            if (target.Animator != null) target.Animator.PlayDie();
+            yield return new WaitForSeconds(0.8f);
+        }
+
+        if (CheckVictory())
         {
             Victory();
             yield break;
@@ -452,65 +527,94 @@ public class BattleManager : MonoBehaviour
 
     private System.Collections.IEnumerator EnemyTurn()
     {
-        DialogText.text = $"{currentEnemy.DisplayName} の攻撃！";
-
-        if (enemyAnimator != null)
+        foreach (var enemy in enemies)
         {
-            enemyAnimator.PlayAttack();
+            if (enemy.IsDead) continue;
+
+            DialogText.text = $"{enemy.Data.DisplayName} の攻撃！";
+
+            if (enemy.Animator != null)
+            {
+                enemy.Animator.PlayAttack();
+            }
+
+            yield return new WaitForSeconds(1f);
+
+            // 小数点切り上げで敵のダメージ計算仮
+            var damage = Mathf.Ceil(
+                    Random.Range(enemy.Data.AttackMin,
+                    enemy.Data.AttackMax)
+                    );
+
+            // Playerが防御中
+            if (isGuading)
+            {
+                damage = Mathf.Ceil(damage * 0.5f);
+            }
+
+            PlayerHP -= damage;
+
+            DialogText.text = $"{damage} のダメージ！";
+
+            UpdateUI();
+
+            yield return new WaitForSeconds(1f);
+
+            if (PlayerHP <= 0f)
+            {
+                // 敗北
+                GameOver();
+                yield break;
+            }
         }
 
-        yield return new WaitForSeconds(1f);
+        // 全ての敵の行動が終わったら防御フラグを下ろす
+        isGuading = false;
 
-        // 小数点切り上げで敵のダメージ計算仮
-        var damage = Mathf.Ceil(
-                Random.Range(currentEnemy.AttackMin,
-                currentEnemy.AttackMax)
-                );
+        isPlayerTurn = true;
+        SetMenuState(BattleMenuState.Root);
+        DialogText.text = "どうする？";
+    }
 
-        // Playerが防御中
-        if (isGuading)
+    private bool CheckVictory()
+    {
+        foreach (var enemy in enemies)
         {
-            damage = Mathf.Ceil(damage * 0.5f);
-            isGuading = false;
+            if (!enemy.IsDead) return false;
         }
-
-        PlayerHP -= damage;
-
-        DialogText.text = $"{damage} のダメージ！";
-
-        UpdateUI();
-
-        yield return new WaitForSeconds(1f);
-
-        if (PlayerHP <= 0f)
-        {
-            // 敗北
-            GameOver();
-        }
-        else
-        {
-            isPlayerTurn = true;
-            SetMenuState(BattleMenuState.Root);
-            DialogText.text = "どうする？";
-        }
+        return true;
     }
 
     /// <summary>
     /// HPなどのUIの更新
     /// </summary>
-    private void UpdateUI()
+    public void UpdateUI()
     {
         PlayerHPText.text = $"HP:{PlayerHP}/{PlayerMaxHP}";
-        if (currentEnemy != null)
+
+        // 敵のステータスUIを更新
+        if (EnemyStatusUIPrefab != null && EnemyStatusUIRoot != null)
         {
-            EnemyNameText.text = currentEnemy.DisplayName;
-            EnemyHPText.text =
-                $"HP:{EnemyHP}/{currentEnemy.MaxHP}";
-        }
-        else
-        {
-            EnemyNameText.text = "Enemy";
-            EnemyHPText.text = $"HP:{EnemyHP}";
+            // 数の不一致があれば再構築
+            if (enemyStatusUIs.Count != enemies.Count)
+            {
+                ClearChildren(EnemyStatusUIRoot);
+                enemyStatusUIs.Clear();
+                foreach (var enemy in enemies)
+                {
+                    var ui = Instantiate(EnemyStatusUIPrefab, EnemyStatusUIRoot);
+                    ui.Setup(enemy);
+                    enemyStatusUIs.Add(ui);
+                }
+            }
+            else
+            {
+                // 既存のUIを更新
+                foreach (var ui in enemyStatusUIs)
+                {
+                    ui.Refresh();
+                }
+            }
         }
     }
 
@@ -518,11 +622,39 @@ public class BattleManager : MonoBehaviour
     {
         DialogText.text = "勝利！";
 
-        if (enemyAnimator != null)
+
+        int exp = 0;
+        foreach (var enemy in enemies)
         {
-            enemyAnimator.PlayDie();
+            exp += enemy.Data.ExpReward;
         }
 
+        int levelUps = 0;
+        if (LevelSystem != null)
+        {
+            levelUps = LevelSystem.AddExp(exp);
+        }
+
+        ApplyPlayerStatus();
+
+        UpdateUI();
+
+        if (levelUps > 0)
+        {
+            DialogText.text +=
+                $"\n{exp} EXP かくとく！" +
+                $"\nレベルが {PlayerStatus.Level} になった！";
+        }
+        else
+        {
+            DialogText.text +=
+                $"\n{exp} EXP かくとく！";
+        }
+
+
+        // アニメーションは既に攻撃時の処理などで再生されているはずだが、
+        // 念のため死んだ敵全員に対して行うならここで。
+        
         Invoke(nameof(ReturnToField), 2f);
     }
     private void GameOver()
