@@ -1,9 +1,14 @@
 
-//ƒOƒ[ƒoƒ‹‚ÈƒQ[ƒ€“àƒtƒ‰ƒO‚ğŠÇ—‚·‚é
+//ã‚°ãƒ­ãƒ¼ãƒãƒ«ãªã‚²ãƒ¼ãƒ å†…ãƒ•ãƒ©ã‚°ã‚’ç®¡ç†ã™ã‚‹
 public static class GameState 
 {
     /// <summary>
-    /// ƒ_ƒCƒAƒƒO‚ªŠJ‚¢‚Ä‚¢‚é‚©
+    /// ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ãŒé–‹ã„ã¦ã„ã‚‹ã‹
     /// </summary>
+    /// <summary>
+    /// ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªãŒé–‹ã„ã¦ã„ã‚‹ã‹
+    /// </summary>
+    public static bool IsInventoryOpen = false;
+
     public static bool IsDialogOpen = false;
 }
