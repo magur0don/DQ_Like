@@ -318,7 +318,7 @@ public class BattleManager : MonoBehaviour
 
         foreach (var entry in inventoryItems)
         {
-            if (entry.Count <= 0) continue;
+            if (entry.Count <= 0 || !entry.Item.CanUseInBattle) continue;
             
             hasAnyItem = true;
             string label = $"{entry.Item.ItemName} ({entry.Count})";

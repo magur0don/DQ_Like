@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: Item_Key
   m_EditorClassIdentifier: 
   ItemName: "\u4E07\u80FD\u9375"
+  Type: 0
+  CanUseInBattle: 0
   Description: "\u307B\u3068\u3093\u3069\u306E\u9375\u3092\u958B\u3051\u3089\u308C\u308B\u9375"
   Icon: {fileID: 0}
+  Power: 0

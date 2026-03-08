@@ -30,6 +30,8 @@ public class InventoryItemSlot : MonoBehaviour
 
         if (HighlightImage != null) HighlightImage.enabled = false;
 
+        if(SelectButton ==null)return;
+
         SelectButton.onClick.RemoveAllListeners();
         SelectButton.onClick.AddListener(() => {
             InventoryUI.Instance.SelectItem(entry);

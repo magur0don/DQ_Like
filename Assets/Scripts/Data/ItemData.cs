@@ -7,7 +7,7 @@ public class ItemData : ScriptableObject
     public enum ItemType
     {
         HealHP,
-        // �����g��
+        // 将来拡張
         HealMP,
         BuffAttack,
         Revive
@@ -17,12 +17,14 @@ public class ItemData : ScriptableObject
 
     public ItemType Type;
 
+    public bool CanUseInBattle = true;
+
     [TextArea(2,4)]
     public string Description;
 
-    // �C�ӂł����AUI�Ŏg���A�C�R��
+    // 任意ですが、UIで使うアイコン
     public Sprite Icon;
 
-    [Header("���ʂ̒l")]
-    public float Power;   // �񕜗ʂȂ�
+    [Header("効果の値")]
+    public float Power;   // 回復量など
 }
