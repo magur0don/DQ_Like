@@ -221,15 +221,8 @@ public class BattleManager : MonoBehaviour
                 return;
             }
 
-            if (!InventoryManager.Instance.
-            UseItem("ポーション(回復薬)"))
-            {
-                DialogText.text = "ポーションがない！";
-                return;
-            }
-
-            StartCoroutine(ExecuteUseItem());
-
+            // アイテム選択メニューを表示
+            BuildItemMenu();
         });
 
         CreateButton(RootMenuRoot, "さくせん", () =>
@@ -311,6 +304,41 @@ public class BattleManager : MonoBehaviour
         }
         CreateButton(FightMenuRoot, "もどる", () => {
             BuildFightMenu();
+        });
+    }
+
+    private void BuildItemMenu()
+    {
+        // アイテムはFightMenuの場所を借りて表示します
+        SetMenuState(BattleMenuState.Fight);
+        ClearChildren(FightMenuRoot);
+        
+        var inventoryItems = InventoryManager.Instance.GetAll();
+        bool hasAnyItem = false;
+
+        foreach (var entry in inventoryItems)
+        {
+            if (entry.Count <= 0) continue;
+            
+            hasAnyItem = true;
+            string label = $"{entry.Item.ItemName} ({entry.Count})";
+            CreateButton(FightMenuRoot, label, () => {
+                // アイテムを使用
+                if (InventoryManager.Instance.UseItem(entry.Item))
+                {
+                    StartCoroutine(ExecuteUseItem(entry.Item));
+                }
+            });
+        }
+
+        if (!hasAnyItem)
+        {
+            DialogText.text = "アイテムを　もっていない！";
+        }
+
+        CreateButton(FightMenuRoot, "もどる", () => {
+            SetMenuState(BattleMenuState.Root);
+            DialogText.text = "どうする？";
         });
     }
 
@@ -409,25 +437,31 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(EnemyTurn());
     }
 
-    private System.Collections.IEnumerator ExecuteUseItem()
+    private System.Collections.IEnumerator ExecuteUseItem(ItemData item)
     {
         isPlayerTurn = false;
-        float heal = InventoryManager.Instance.GetItemData(
-           "ポーション(回復薬)").Power;
+        SetMenuState(BattleMenuState.Busy);
+        DialogText.text = $"{item.ItemName} を つかった！";
+        yield return new WaitForSeconds(0.8f);
 
-        // 回復させる
-        PlayerHP += heal;
-        if (PlayerHP > PlayerMaxHP)
+        if (item.Type == ItemData.ItemType.HealHP)
         {
-            PlayerHP = PlayerMaxHP;
+            float heal = item.Power;
+            PlayerHP = Mathf.Min(PlayerMaxHP, PlayerHP + heal);
+            DialogText.text = $"HPが {heal} かいふくした！";
         }
-
-        DialogText.text = $"HPが {heal} かいふくした！";
+        else if (item.Type == ItemData.ItemType.HealMP)
+        {
+            // MP未実装ならメッセージのみ
+            DialogText.text = "MPが　かいふくした！";
+        }
+        else
+        {
+            DialogText.text = "しかし　なにも　おこらなかった！";
+        }
 
         UpdateUI();
         yield return new WaitForSeconds(0.8f);
-
-        SetMenuState(BattleMenuState.Busy);
 
         StartCoroutine(EnemyTurn());
     }

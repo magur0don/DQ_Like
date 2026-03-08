@@ -7,9 +7,14 @@ public class InventoryItemSlot : MonoBehaviour
     public TextMeshProUGUI NameText;
     public TextMeshProUGUI CountText;
     public Image IconImage;
+    public Image HighlightImage;
+    public Button SelectButton;
+
+    private InventryEntry entry;
 
     public void SetData(InventryEntry entry)
     {
+        this.entry = entry;
         NameText.text = entry.Item.ItemName;
         CountText.text = entry.Count.ToString();
         
@@ -21,6 +26,21 @@ public class InventoryItemSlot : MonoBehaviour
         else if (IconImage != null)
         {
             IconImage.enabled = false;
+        }
+
+        if (HighlightImage != null) HighlightImage.enabled = false;
+
+        SelectButton.onClick.RemoveAllListeners();
+        SelectButton.onClick.AddListener(() => {
+            InventoryUI.Instance.SelectItem(entry);
+        });
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        if (HighlightImage != null)
+        {
+            HighlightImage.enabled = isSelected;
         }
     }
 }

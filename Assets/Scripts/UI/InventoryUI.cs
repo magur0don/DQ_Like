@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 public class InventoryUI : MonoBehaviour
 {
@@ -9,10 +11,19 @@ public class InventoryUI : MonoBehaviour
     public Transform ItemContainer;
     public GameObject ItemSlotPrefab;
 
+    [Header("Details UI")]
+    public TextMeshProUGUI DetailNameText;
+    public TextMeshProUGUI DetailDescriptionText;
+    public Button UseButton;
+
+    private InventryEntry selectedEntry;
+    private List<InventoryItemSlot> slots = new List<InventoryItemSlot>();
+
     private void Awake()
     {
         Instance = this;
         Panel.SetActive(false);
+        if (UseButton != null) UseButton.onClick.AddListener(OnUseButtonClicked);
     }
 
     public void Toggle()
@@ -31,6 +42,8 @@ public class InventoryUI : MonoBehaviour
     {
         GameState.IsInventoryOpen = true;
         Panel.SetActive(true);
+        selectedEntry = null;
+        UpdateDetails();
         Refresh();
     }
 
@@ -47,6 +60,7 @@ public class InventoryUI : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+        slots.Clear();
 
         // Spawn new slots
         var items = InventoryManager.Instance.GetAll();
@@ -57,7 +71,70 @@ public class InventoryUI : MonoBehaviour
             if (slot != null)
             {
                 slot.SetData(entry);
+                slots.Add(slot);
             }
         }
+    }
+
+    public void SelectItem(InventryEntry entry)
+    {
+        selectedEntry = entry;
+        UpdateDetails();
+
+        // Highlight the selected slot
+        foreach (var slot in slots)
+        {
+            // entryが一致するかどうかで判定
+            // (本来はIDなどがあると良いですが、ここでは参照で比較します)
+            slot.SetSelected(false);
+        }
+
+        // 選択されたスロットをハイライト
+        var selectedSlot = slots.Find(s => s.gameObject.activeInHierarchy && s.NameText.text == entry.Item.ItemName);
+        if (selectedSlot != null) selectedSlot.SetSelected(true);
+    }
+
+    private void UpdateDetails()
+    {
+        if (selectedEntry == null)
+        {
+            if (DetailNameText != null) DetailNameText.text = "----";
+            if (DetailDescriptionText != null) DetailDescriptionText.text = "アイテムを選択してください";
+            if (UseButton != null) UseButton.interactable = false;
+            return;
+        }
+
+        if (DetailNameText != null) DetailNameText.text = selectedEntry.Item.ItemName;
+        if (DetailDescriptionText != null) DetailDescriptionText.text = selectedEntry.Item.Description;
+        if (UseButton != null) UseButton.interactable = selectedEntry.Count > 0;
+    }
+
+    private void OnUseButtonClicked()
+    {
+        if (selectedEntry == null || selectedEntry.Count <= 0) return;
+
+        // アイテムを使用するロジック
+        // ここではInventoryManagerのUseItemを呼び出します
+        if (InventoryManager.Instance.UseItem(selectedEntry.Item))
+        {
+            Debug.Log($"{selectedEntry.Item.ItemName} を使用しました");
+            
+            // 効果の適用（将来的に拡張可能）
+            ApplyItemEffect(selectedEntry.Item);
+
+            // 表示の更新
+            UpdateDetails();
+            Refresh();
+        }
+    }
+
+    private void ApplyItemEffect(ItemData item)
+    {
+        // ここにアイテムの効果に応じた処理を追加します
+        // 例: HP回復など
+        Debug.Log($"Effect applied: {item.Type} Power: {item.Power}");
+        
+        // フィールドでの使用を想定する場合、プレイヤーのHPを回復させるなどの処理
+        // BattleManagerがある場合はそちらと連携させる必要があります
     }
 }
