@@ -93,10 +93,10 @@ public class BattleManager : MonoBehaviour
         {
             return;
         }
-        PlayerMaxHP = PlayerStatus.MaxHP;
+        PlayerMaxHP = PlayerState.Instance.MaxHP;
         PlayerHP = Mathf.Min(PlayerHP, PlayerMaxHP);
-        PlayerAttackMin = PlayerStatus.AttackMin;
-        PlayerAttackMax = PlayerStatus.AttackMax;
+        PlayerAttackMin = PlayerState.Instance.AttackMin;
+        PlayerAttackMax = PlayerState.Instance.AttackMax;
         Debug.Log($"{PlayerAttackMax}");
     }
 

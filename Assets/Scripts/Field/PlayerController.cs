@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public Transform CameraTransform;
 
+    public StatusUI StatusUI;
 
     private CharacterController controller;
 
@@ -48,7 +49,7 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-        
+
         Move();
         ApplyGravity();
     }
@@ -75,6 +76,23 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+    public void OnEquipment(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            Debug.Log("おされれうｒ");
+            if (!StatusUI.gameObject.activeSelf)
+            {
+                StatusUI.Open();
+            }
+            else
+            {
+                StatusUI.Close();
+            }
+        }
+    }
+
 
     private void Move()
     {

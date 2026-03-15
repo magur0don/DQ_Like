@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Player‚ªInteraction(Œğ—¬)‚ğ‚·‚é‚½‚ß‚Ìclass
+/// Playerã®Interactionï¼ˆç›¸äº’ä½œç”¨ï¼‰ã‚’è¡Œã†ãŸã‚ã®ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class Interactor : MonoBehaviour
 {
     /// <summary>
-    /// Distance‚Ì’lmæ‚Ü‚ÅŒğ—¬‚ªs‚¦‚é‚æ‚¤‚É‚·‚é‚½‚ß‚Ì•Ï”
+    /// ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆå¯èƒ½ãªè·é›¢
     /// </summary>
     public float Distance = 2.0f;
 
@@ -15,53 +15,53 @@ public class Interactor : MonoBehaviour
 
     public float EyeHeight = 0.5f;
 
-    // PlayerInput‚ÌInteract(EƒL[)‚ª‰Ÿ‚³‚ê‚½‚ÉŒÄ‚Î‚ê‚Ü‚·
+    // PlayerInputã®Interact(Eã‚­ãƒ¼)ãŒæŠ¼ã•ã‚ŒãŸæ™‚ã«å‘¼ã°ã‚Œã¾ã™
     public void OnInteract(InputValue value)
     {
-        // ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚È‚©‚Á‚½‚ç‰½‚à‚µ‚È‚¢
         if (!value.isPressed)
         {
             return;
         }
+
+        // ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ãŒé–‹ã„ã¦ã„ã‚‹å ´åˆã¯ã€æ¬¡ã¸é€²ã‚ã‚‹ï¼ˆã¾ãŸã¯é–‰ã˜ã‚‹ï¼‰
+        if (GameState.IsDialogOpen && DialogUI.Instance != null)
+        {
+            DialogUI.Instance.Next();
+            return;
+        }
+
         TryInteract();
     }
 
     private void TryInteract()
     {
         Vector3 origin = transform.position + Vector3.up * EyeHeight;
-        // Œõü‚ğ”­Ë‚·‚é
+        // ãƒ¬ã‚¤ã‚’ç™ºå°„ã™ã‚‹
         Ray ray = new Ray(origin, transform.forward);
 
-        // Œõü‚ª‚Ç‚¤‚È‚Á‚Ä‚é‚©‚ÌƒfƒoƒbƒO—p‚Ìü‚ğ•\¦‚·‚é
-        Debug.DrawRay(origin, transform.forward * Distance,
-            Color.yellow, 0.5f);
+        // ãƒ‡ãƒãƒƒã‚°ç”¨ã®ç·š
+        Debug.DrawRay(origin, transform.forward * Distance, Color.yellow, 0.5f);
 
-        // Œõü‚ğËo‚µ‚Ä‚İ‚ÄA“–‚½‚é‚©‚Ç‚¤‚©‚Ìî•ñA
-        // Ëo‚·‚éŒõü‚Ì’·‚³A“–‚½‚é‚×‚«Layer
-        if (Physics.Raycast(ray, out RaycastHit hit,
-            Distance, InteractLayer))
+        // ãƒ¬ã‚¤ãŒä½•ã‹ã«å½“ãŸã£ãŸã‹åˆ¤å®š
+        if (Physics.Raycast(ray, out RaycastHit hit, Distance, InteractLayer))
         {
-            // “–‚½‚Á‚½ê‡A
-            // “–‚½‚è”»’è‚©‚çIInteractable‚ğæ“¾‚·‚é
-            var interactable =
-                hit.collider.GetComponent<IInteractable>();
-            // Interact()‚ğ”­‰Î‚³‚¹‚é
+            // å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‹ã‚‰IInteractableã‚’å–å¾—
+            var interactable = hit.collider.GetComponent<IInteractable>();
+            // ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ãƒˆå®Ÿè¡Œ
             interactable?.Interact();
         }
     }
 
-    ///Dialog‚ği‚ß‚é
+    // ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ãªã©ã€ä»–ã®ã€Œæ¬¡ã¸ã€æ“ä½œç”¨ï¼ˆã‚‚ã—ã‚ã‚Œã°ï¼‰
     public void OnMessageNext(InputValue value)
     {
-        // ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ä‚È‚©‚Á‚½‚ç‰½‚à‚µ‚È‚¢
         if (!value.isPressed)
         {
             return;
         }
-        // ƒ_ƒCƒAƒƒO‚ª•\¦‚³‚ê‚Ä‚¢‚½‚ç
-        if (GameState.IsDialogOpen)
+
+        if (GameState.IsDialogOpen && DialogUI.Instance != null)
         {
-            // Ÿ‚Ìs‚Éi‚ß‚Ä‚à‚ç‚¤B
             DialogUI.Instance.Next();
         }
     }
