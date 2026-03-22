@@ -27,4 +27,7 @@ public class ItemData : ScriptableObject
 
     [Header("効果の値")]
     public float Power;   // 回復量など
+
+    [Header("Shop用のデータ")]
+    public int Price; // 値段
 }

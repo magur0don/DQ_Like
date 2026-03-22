@@ -18,6 +18,7 @@ public class EnemyData : ScriptableObject
 
     [Header("Reward")]
     public int ExpReward = 5; //“|‚µ‚½‚ç–á‚¦‚éŒoŒ±’l
+    public int GoldReward = 10; // “|‚µ‚½‚ç–á‚¦‚éƒS[ƒ‹ƒh
 
     [TextArea(2, 4)]
     public string Description;  // “G‚É‚Â‚¢‚Ä‚Ìà–¾

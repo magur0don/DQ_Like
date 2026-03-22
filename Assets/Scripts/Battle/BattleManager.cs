@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections;
 
 public enum BattleMenuState
 {
@@ -12,7 +13,7 @@ public enum BattleMenuState
 
 public class BattleManager : MonoBehaviour
 {
-    public static int[] NextEnemyIDs = new int[] { 0 ,0};
+    public static int[] NextEnemyIDs = new int[] { 0, 0 };
 
     [Header("EnemyData")]
     public EnemyDatabase EnemyDB;
@@ -253,7 +254,8 @@ public class BattleManager : MonoBehaviour
                 return;
             }
             // ターゲット選択メニューを表示
-            BuildTargetMenu((target) => {
+            BuildTargetMenu((target) =>
+            {
                 StartCoroutine(ExecuteAttack(target));
             });
         });
@@ -272,7 +274,8 @@ public class BattleManager : MonoBehaviour
                 return;
             }
             // ターゲット選択メニューを表示
-            BuildTargetMenu((target) => {
+            BuildTargetMenu((target) =>
+            {
                 StartCoroutine(ExecutePowerSkill(target));
             });
         });
@@ -297,12 +300,14 @@ public class BattleManager : MonoBehaviour
         foreach (var enemy in enemies)
         {
             if (enemy.IsDead) continue;
-            
-            CreateButton(FightMenuRoot, enemy.Data.DisplayName, () => {
+
+            CreateButton(FightMenuRoot, enemy.Data.DisplayName, () =>
+            {
                 onSelected?.Invoke(enemy);
             });
         }
-        CreateButton(FightMenuRoot, "もどる", () => {
+        CreateButton(FightMenuRoot, "もどる", () =>
+        {
             BuildFightMenu();
         });
     }
@@ -312,17 +317,18 @@ public class BattleManager : MonoBehaviour
         // アイテムはFightMenuの場所を借りて表示します
         SetMenuState(BattleMenuState.Fight);
         ClearChildren(FightMenuRoot);
-        
+
         var inventoryItems = InventoryManager.Instance.GetAll();
         bool hasAnyItem = false;
 
         foreach (var entry in inventoryItems)
         {
             if (entry.Count <= 0 || !entry.Item.CanUseInBattle) continue;
-            
+
             hasAnyItem = true;
             string label = $"{entry.Item.ItemName} ({entry.Count})";
-            CreateButton(FightMenuRoot, label, () => {
+            CreateButton(FightMenuRoot, label, () =>
+            {
                 // アイテムを使用
                 if (InventoryManager.Instance.UseItem(entry.Item))
                 {
@@ -336,7 +342,8 @@ public class BattleManager : MonoBehaviour
             DialogText.text = "アイテムを　もっていない！";
         }
 
-        CreateButton(FightMenuRoot, "もどる", () => {
+        CreateButton(FightMenuRoot, "もどる", () =>
+        {
             SetMenuState(BattleMenuState.Root);
             DialogText.text = "どうする？";
         });
@@ -369,7 +376,7 @@ public class BattleManager : MonoBehaviour
 
         if (CheckVictory())
         {
-            Victory();
+            StartCoroutine(Victory());
             yield break;
         }
         StartCoroutine(EnemyTurn());
@@ -419,7 +426,7 @@ public class BattleManager : MonoBehaviour
 
         if (CheckVictory())
         {
-            Victory();
+            StartCoroutine(Victory());
             yield break;
         }
         StartCoroutine(EnemyTurn());
@@ -652,10 +659,9 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    private void Victory()
+    private IEnumerator Victory()
     {
         DialogText.text = "勝利！";
-
 
         int exp = 0;
         foreach (var enemy in enemies)
@@ -685,10 +691,23 @@ public class BattleManager : MonoBehaviour
                 $"\n{exp} EXP かくとく！";
         }
 
+        // 1秒待って
+        yield return new WaitForSeconds(1f);
+
+        int gold = 0;
+        foreach (var enemy in enemies)
+        {
+            gold += enemy.Data.GoldReward;
+        }
+        // データ上のゴールドを増やす
+        PlayerState.Instance.AddGold(gold);
+
+        // ユーザーにGoldが増えたことを通知する
+        DialogText.text = $"{gold} Gold かくとく！";
+
 
         // アニメーションは既に攻撃時の処理などで再生されているはずだが、
         // 念のため死んだ敵全員に対して行うならここで。
-        
         Invoke(nameof(ReturnToField), 2f);
     }
     private void GameOver()
