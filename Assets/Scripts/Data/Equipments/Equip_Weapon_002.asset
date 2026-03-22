@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0b4e089cab197af4c8b41641607504f4, type: 3}
-  m_Name: Equip_Weapon_001
+  m_Name: Equip_Weapon_002
   m_EditorClassIdentifier: 
-  DisplayName: "\u3066\u3064\u306E\u3064\u308B\u304E"
+  DisplayName: "\u306F\u304C\u306D\u306E\u3064\u308B\u304E"
   Type: 0
   BonusHp: 0
-  BonusAttack: 10
+  BonusAttack: 20
   BonusDefence: 0
-  Price: 0
+  Price: 200

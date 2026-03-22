@@ -3,8 +3,9 @@ using System.Collections.Generic;
 
 public class ShopManager : MonoBehaviour
 {
-    [Header("‚±‚Ì‚¨“X‚Å”„‚Á‚Ä‚¢‚éƒAƒCƒeƒ€")]
+    [Header("ã‚·ãƒ§ãƒƒãƒ—ã§å£²ã£ã¦ã„ã‚‹ã‚¢ã‚¤ãƒ†ãƒ ã¨è£…å‚™")]
     public List<ItemData> ShopItems;
+    public List<EquipmentData> ShopEquipments;
 
     public void BuyItem(ItemData itemToBuy)
     {
@@ -14,15 +15,34 @@ public class ShopManager : MonoBehaviour
         }
         if (PlayerState.Instance.ConsumeGold(itemToBuy.Price))
         {
-            // x•¥‚¢‚É¬Œ÷‚µ‚½‚çƒCƒ“ƒxƒ“ƒgƒŠƒ}ƒl[ƒWƒƒ[‚ÉƒAƒCƒeƒ€‚ğ’Ç‰Á‚·‚é
+            // ã‚´ãƒ¼ãƒ«ãƒ‰ãŒæ¸›é¡ã•ã‚ŒãŸã®ã§ã€ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªã«ã‚¢ã‚¤ãƒ†ãƒ ã‚’å…¥ã‚Œã‚‹ï¼
             InventoryManager.Instance.Add(itemToBuy, 1);
-            DialogUI.Instance.ShowSimpleMessage($"{itemToBuy.ItemName} ‚ğ 1‚± ”ƒ‚Á‚½");
+            DialogUI.Instance.ShowSimpleMessage($"{itemToBuy.ItemName} ã‚’ 1å€‹ è²·ã£ãŸï¼");
         }
         else
         {
-            DialogUI.Instance.ShowSimpleMessage("‚¨‚©‚Ë‚ª ‚½‚è‚Ü‚¹‚ñ");
+            DialogUI.Instance.ShowSimpleMessage("ãŠã‹ã­ãŒ ãŸã‚Šãªã„ï¼");
         }
-        // ‰½‚©ƒCƒ“ƒ^ƒ‰ƒNƒg‚µ‚½‚çAShop‚ÌCanvas‚ğ•Â‚¶‚é
+        // ãªãœã‹ã‚¤ãƒ³ã‚¹ãƒšã‚¯ã‚¿ãƒ¼ç­‰ã§éè¡¨ç¤ºã€Shopã®Canvasã‚’é–‰ã˜ã‚‹æƒ³å®š
+        this.gameObject.SetActive(false);
+    }
+
+    public void BuyEquipment(EquipmentData equipmentToBuy)
+    {
+        if (equipmentToBuy == null)
+        {
+            return;
+        }
+        if (PlayerState.Instance.ConsumeGold(equipmentToBuy.Price))
+        {
+            EquipmentManager.Instance.Equip(equipmentToBuy);
+            // ScriptableObjectã®nameã‚’ä½¿ã£ã¦ã„ã¾ã™
+            DialogUI.Instance.ShowSimpleMessage($"{equipmentToBuy.DisplayName} ã‚’ ãã†ã³ã—ãŸï¼");
+        }
+        else
+        {
+            DialogUI.Instance.ShowSimpleMessage("ãŠã‹ã­ãŒ ãŸã‚Šãªã„ï¼");
+        }
         this.gameObject.SetActive(false);
     }
 }
