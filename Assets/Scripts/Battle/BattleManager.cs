@@ -667,11 +667,26 @@ public class BattleManager : MonoBehaviour
             {
                 ClearChildren(EnemyStatusUIRoot);
                 enemyStatusUIs.Clear();
-                foreach (var enemy in enemies)
+                for (int i = 0; i < enemies.Count; i++)
                 {
+                    var enemy = enemies[i];
                     var ui = Instantiate(EnemyStatusUIPrefab, EnemyStatusUIRoot);
                     ui.Setup(enemy);
                     enemyStatusUIs.Add(ui);
+
+                    // LayoutGroupコンポーネントがアタッチされていない場合の救済措置として
+                    // スクリプトから強制的に横（左右）にずらして等間隔に並べる
+                    if (EnemyStatusUIRoot.GetComponent<UnityEngine.UI.LayoutGroup>() == null)
+                    {
+                        var rect = ui.GetComponent<RectTransform>();
+                        if (rect != null)
+                        {
+                            // 画面の中央を基準に、左右に配置する計算
+                            float xSpacing = 250f; // 横の間隔（UIが重なる場合はこの数値を大きくしてください）
+                            float xOffset = (i - (enemies.Count - 1) * 0.5f) * xSpacing;
+                            rect.anchoredPosition += new Vector2(xOffset, 0);
+                        }
+                    }
                 }
             }
             else
