@@ -17,4 +17,11 @@ MonoBehaviour:
   MaxHP: 300
   AttackMin: 50
   AttackMax: 70
+  ModelPrefab: {fileID: 0}
+  ModelPosition: {x: 0, y: 0, z: 2}
+  ModelRotation: {x: 0, y: 180, z: 0}
+  ModelScale: {x: 1, y: 1, z: 1}
+  ExpReward: 5
+  GoldReward: 10
   Description: 
+  IsBoss: 1

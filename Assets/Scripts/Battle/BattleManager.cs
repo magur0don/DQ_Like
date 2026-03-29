@@ -64,6 +64,9 @@ public class BattleManager : MonoBehaviour
 
     private bool isPlayerTurn = true;
 
+    [Header("BGM Settings")]
+    public AudioClip RegularBGM;
+    public AudioClip BossBGM;
 
     void Start()
     {
@@ -85,6 +88,29 @@ public class BattleManager : MonoBehaviour
         {
             DialogText.text = $"{enemies[0].Data.DisplayName} が現れた！";
         }
+
+        PlayBattleBGM();
+    }
+
+    private void PlayBattleBGM()
+    {
+        if (BGMManager.Instance == null) return;
+
+        bool isBossBattle = false;
+        foreach (var enemy in enemies)
+        {
+            if (enemy.Data.IsBoss)
+            {
+                isBossBattle = true;
+                break;
+            }
+        }
+
+        AudioClip bgmToPlay = isBossBattle ? BossBGM : RegularBGM;
+        if (bgmToPlay != null)
+        {
+            BGMManager.Instance.PlayBGM(bgmToPlay);
+        }
     }
 
     /// データからプレイヤーの値を反映する
@@ -95,7 +121,7 @@ public class BattleManager : MonoBehaviour
             return;
         }
         PlayerMaxHP = PlayerState.Instance.MaxHP;
-        PlayerHP = Mathf.Min(PlayerHP, PlayerMaxHP);
+        PlayerHP = Mathf.Min(PlayerState.Instance.CurrentHP, PlayerMaxHP);
         PlayerAttackMin = PlayerState.Instance.AttackMin;
         PlayerAttackMax = PlayerState.Instance.AttackMax;
         Debug.Log($"{PlayerAttackMax}");
@@ -708,7 +734,24 @@ public class BattleManager : MonoBehaviour
 
         // アニメーションは既に攻撃時の処理などで再生されているはずだが、
         // 念のため死んだ敵全員に対して行うならここで。
-        Invoke(nameof(ReturnToField), 2f);
+        bool isBossDefeated = false;
+        foreach (var enemy in enemies)
+        {
+            if (enemy.Data.IsBoss)
+            {
+                isBossDefeated = true;
+                break;
+            }
+        }
+
+        if (isBossDefeated)
+        {
+            Invoke(nameof(ReturnToResult), 2f);
+        }
+        else
+        {
+            Invoke(nameof(ReturnToField), 2f);
+        }
     }
     private void GameOver()
     {
@@ -717,6 +760,13 @@ public class BattleManager : MonoBehaviour
     }
     private void ReturnToField()
     {
+        if (PlayerState.Instance != null) PlayerState.Instance.CurrentHP = PlayerHP;
         SceneManager.LoadScene("Field_01");
+    }
+
+    private void ReturnToResult()
+    {
+        if (PlayerState.Instance != null) PlayerState.Instance.CurrentHP = PlayerHP;
+        SceneManager.LoadScene("ResultScene");
     }
 }

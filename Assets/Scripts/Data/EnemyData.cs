@@ -22,4 +22,7 @@ public class EnemyData : ScriptableObject
 
     [TextArea(2, 4)]
     public string Description;  // “G‚É‚Â‚¢‚Ä‚Ìà–¾
+
+    [Header("ƒ{ƒX‚Ìİ’è")]
+    public bool IsBoss = false;
 }

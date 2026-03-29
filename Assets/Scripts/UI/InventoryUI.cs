@@ -122,6 +122,11 @@ public class InventoryUI : MonoBehaviour
             // 効果の適用（将来的に拡張可能）
             ApplyItemEffect(selectedEntry.Item);
 
+            if (selectedEntry.Count <= 0)
+            {
+                selectedEntry = null;
+            }
+
             // 表示の更新
             UpdateDetails();
             Refresh();
@@ -130,11 +135,21 @@ public class InventoryUI : MonoBehaviour
 
     private void ApplyItemEffect(ItemData item)
     {
-        // ここにアイテムの効果に応じた処理を追加します
-        // 例: HP回復など
-        Debug.Log($"Effect applied: {item.Type} Power: {item.Power}");
-        
-        // フィールドでの使用を想定する場合、プレイヤーのHPを回復させるなどの処理
-        // BattleManagerがある場合はそちらと連携させる必要があります
+        if (item.Type == ItemData.ItemType.HealHP)
+        {
+            if (PlayerState.Instance != null)
+            {
+                PlayerState.Instance.CurrentHP += item.Power;
+                if (PlayerState.Instance.CurrentHP > PlayerState.Instance.MaxHP)
+                {
+                    PlayerState.Instance.CurrentHP = PlayerState.Instance.MaxHP;
+                }
+                Debug.Log($"{item.ItemName}を使用しました。HPが回復しました。現在のHP:{PlayerState.Instance.CurrentHP}");
+            }
+        }
+        else if (item.Type == ItemData.ItemType.HealMP)
+        {
+            Debug.Log($"{item.ItemName}を使用しました。MPが回復しました。");
+        }
     }
 }

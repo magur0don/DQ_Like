@@ -4,14 +4,16 @@ public class PlayerState : MonoBehaviour
 {
     public static PlayerState Instance;
 
-    [Header("Šî‘b‚ÌƒXƒe[ƒ^ƒXî•ñ")]
+    [Header("åŸºç¤ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹æƒ…å ±")]
     public PlayerStatus PlayerStatus;
 
-    [Header("Œ»İ‚ÌŠ‹à")]
+    [Header("ç¾åœ¨ã®æ‰€æŒé‡‘")]
     public int CurrentGold = 500;
 
+    public float CurrentHP;
+
     /// <summary>
-    /// Š‹à‚ğ‘‚â‚·
+    /// æ‰€æŒé‡‘ã‚’å¢—ã‚„ã™
     /// </summary>
     public void AddGold(int amount)
     {
@@ -19,7 +21,7 @@ public class PlayerState : MonoBehaviour
     }
 
     /// <summary>
-    /// ‚¨‹à‚ª‘«‚è‚é‚©‚Ìƒ`ƒFƒbƒN
+    /// ãŠé‡‘ãŒè¶³ã‚Šã‚‹ã‹ã®ãƒã‚§ãƒƒã‚¯
     /// </summary>
     /// <param name="amount"></param>
     /// <returns></returns>
@@ -28,9 +30,9 @@ public class PlayerState : MonoBehaviour
         if (CurrentGold >= amount)
         {
             CurrentGold -= amount;
-            return true;// x•¥‚¢‚Å‚«‚Ü‚·
+            return true;// æ”¯æ‰•ã„ã§ãã¾ã™
         }
-        return false;// x•¥‚¢•s‰Â
+        return false;// æ”¯æ‰•ã„ä¸å¯
     }
 
     private void Awake()
@@ -39,6 +41,7 @@ public class PlayerState : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            CurrentHP = MaxHP;
         }
         else
         {

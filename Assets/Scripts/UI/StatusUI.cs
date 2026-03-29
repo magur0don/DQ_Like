@@ -25,23 +25,23 @@ public class StatusUI : MonoBehaviour
         }
         LevelText.text =
             $"LV:{PlayerState.Instance.PlayerStatus.Level}";
-        // ‚Ù‚©‚Ì€–Ú‚É‚Â‚¢‚Ä‚àƒf[ƒ^‚ğ”½‰f‚³‚¹‚Ä‚­‚¾‚³‚¢B
+        // ã»ã‹ã®é …ç›®ã«ã¤ã„ã¦ã‚‚ãƒ‡ãƒ¼ã‚¿ã‚’åæ˜ ã•ã›ã¦ãã ã•ã„ã€‚
         HPText.text =
-            $"HP{PlayerState.Instance.PlayerStatus.MaxHP}";
+            $"HP:{PlayerState.Instance.CurrentHP} / {PlayerState.Instance.MaxHP}";
 
         AttakText.text =
-            $"‚±‚¤‚°‚«:{PlayerState.Instance.AttackMax}" +
+            $"ã“ã†ã’ã:{PlayerState.Instance.AttackMax}" +
             $"/ {PlayerState.Instance.AttackMin}";
 
         DefenceText.text =
-            $"‚Ú‚¤‚¬‚å:{PlayerState.Instance.Defence}";
+            $"ã¼ã†ãã‚‡:{PlayerState.Instance.Defence}";
 
         if (EquipmentManager.Instance != null)
         {
             WeaponText.text =
-                $"‚Ô‚«:{EquipmentManager.Instance.EquipmentWeapon.DisplayName}";
+                $"ã¶ã:{EquipmentManager.Instance.EquipmentWeapon.DisplayName}";
             ArmorText.text =
-                $"‚Ú‚¤‚®:{EquipmentManager.Instance.EquipmentArmor.DisplayName}";
+                $"ã¼ã†ã:{EquipmentManager.Instance.EquipmentArmor.DisplayName}";
         }
     }
 

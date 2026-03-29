@@ -1555,6 +1555,8 @@ MonoBehaviour:
   FightMenuPanel: {fileID: 1958765915}
   FightMenuRoot: {fileID: 1958765916}
   MenuButtonPrefab: {fileID: 2344155129608750865, guid: ebf1042d903858a47a4b3f06f41c9324, type: 3}
+  RegularBGM: {fileID: 8300000, guid: 08ae8cc6cf523284481110ad8ee4a70e, type: 3}
+  BossBGM: {fileID: 8300000, guid: 45263423896af8b499b5b77b05de8cb8, type: 3}
 --- !u!1 &1808086281
 GameObject:
   m_ObjectHideFlags: 0

@@ -68,11 +68,14 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
-            Debug.Log(InventoryUI.Instance);
-            // InventoryUIInstanceꍇAToggleĂ
             if (InventoryUI.Instance != null)
             {
                 InventoryUI.Instance.Toggle();
+
+                if (GameState.IsInventoryOpen && StatusUI != null)
+                {
+                    StatusUI.Close();
+                }
             }
         }
     }
@@ -81,10 +84,14 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
-            Debug.Log("おされれうｒ");
             if (!StatusUI.gameObject.activeSelf)
             {
                 StatusUI.Open();
+                
+                if (InventoryUI.Instance != null && GameState.IsInventoryOpen)
+                {
+                    InventoryUI.Instance.Close();
+                }
             }
             else
             {
